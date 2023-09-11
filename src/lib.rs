@@ -56,7 +56,7 @@ impl CheckSSL {
     /// ```no_run
     /// use checkssl::CheckSSL;
     ///
-    /// match CheckSSL::from_domain("rust-lang.org") {
+    /// match CheckSSL::from_domain_with_port("rust-lang.org", "443") {
     ///   Ok(certificate) => {
     ///     // do something with certificate
     ///     assert!(certificate.server.is_valid);
@@ -67,7 +67,7 @@ impl CheckSSL {
     ///   }
     /// }
     /// ```
-    pub fn from_domain(domain: &str) -> Result<Cert, std::io::Error> {
+    pub fn from_domain_with_port(domain: &str, port: &str) -> Result<Cert, std::io::Error> {
         let mut config = rustls::ClientConfig::new();
         config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
 
@@ -78,7 +78,7 @@ impl CheckSSL {
         };
 
         let mut sess = rustls::ClientSession::new(&rc_config, site);
-        let mut sock = TcpStream::connect(format!("{}:443", domain))?;
+        let mut sock = TcpStream::connect(format!("{}:{}", domain, port))?;
         let mut tls = rustls::Stream::new(&mut sess, &mut sock);
 
         let req = format!("GET / HTTP/1.0\r\nHost: {}\r\nConnection: \
@@ -254,12 +254,12 @@ mod tests {
 
     #[test]
     fn test_check_ssl_server_is_valid() {
-        assert!(CheckSSL::from_domain("rust-lang.org").unwrap().server.is_valid);
+        assert!(CheckSSL::from_domain_with_port("rust-lang.org", "443").unwrap().server.is_valid);
     }
 
     #[test]
     fn test_check_ssl_server_is_invalid() {
-        let actual = CheckSSL::from_domain("expired.badssl.com").map_err(|e| e.kind());
+        let actual = CheckSSL::from_domain_with_port("expired.badssl.com", "443").map_err(|e| e.kind());
         let expected = Err(ErrorKind::InvalidData);
 
         assert_eq!(expected, actual);

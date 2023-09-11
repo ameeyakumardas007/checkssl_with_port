@@ -6,7 +6,7 @@
 ```rust
 use checkssl::CheckSSL;
 
-let certificate = CheckSSL::from_domain("rust-lang.org").unwrap();
+let certificate = CheckSSL::from_domain_with_port("rust-lang.org", "443").unwrap();
 println!("{:?}", certificate)
 
 ```
