@@ -86,6 +86,8 @@ impl CheckSSL {
                           domain);
         tls.write_all(req.as_bytes())?;
 
+        println!("passed");
+
         let mut server_cert = ServerCert {
             common_name: "".to_string(),
             signature_algorithm: "".to_string(),
