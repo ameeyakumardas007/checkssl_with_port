@@ -68,14 +68,21 @@ impl CheckSSL {
     /// }
     /// ```
     pub fn from_domain_with_port(domain: &str, port: &str) -> Result<Cert, std::io::Error> {
+
+        println!("passed 0");
+
         let mut config = rustls::ClientConfig::new();
         config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+
+        println!("passed 1");
 
         let rc_config = Arc::new(config);
         let site = match webpki::DNSNameRef::try_from_ascii_str(domain) {
             Ok(val) => val,
             Err(e) => return Err(Error::new(ErrorKind::InvalidInput, e.to_string())),
         };
+
+        println!("passed 2");
 
         let mut sess = rustls::ClientSession::new(&rc_config, site);
         let mut sock = TcpStream::connect(format!("{}:{}", domain, port))?;
@@ -86,7 +93,7 @@ impl CheckSSL {
                           domain);
         tls.write_all(req.as_bytes())?;
 
-        println!("passed");
+        println!("passed 3");
 
         let mut server_cert = ServerCert {
             common_name: "".to_string(),
